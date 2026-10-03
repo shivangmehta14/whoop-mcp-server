@@ -582,25 +582,17 @@ async function main(): Promise<void> {
 			res.json({ status: 'ok', authenticated: Boolean(db.getTokens()) });
 		});
 
-		app.get('/.well-known/oauth-protected-resource', (_req: Request, res: Response) => {
-			res.status(200).json({});
-		});
-
-		app.get('/.well-known/oauth-protected-resource/mcp', (_req: Request, res: Response) => {
-			res.status(200).json({});
-		});
-
-		app.get('/.well-known/oauth-authorization-server', (_req: Request, res: Response) => {
-			res.status(200).json({});
-		});
-
-		app.post('/register', (_req: Request, res: Response) => {
-			res.status(200).json({});
-		});
 
 		app.all('/mcp', async (req: Request, res: Response) => {
 			const sessionId = req.headers['mcp-session-id'] as string | undefined;
 			const requestStart = Date.now();
+
+			const secret = process.env.MCP_SECRET;
+if (secret && req.query.key !== secret) {
+  res.status(404).send('Not found');
+  return;
+}
+
 
 			if (req.method === 'DELETE' && sessionId && transports.has(sessionId)) {
 				const session = transports.get(sessionId)!;
